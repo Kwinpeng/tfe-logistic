@@ -22,6 +22,7 @@ def forward(w, b, x):
     out = np.dot(x, w) + b
     return sigmoid(out)
 
+
 if __name__ == '__main__':
     xdf = pd.read_csv('default_credit_tfe_host.csv', header=None)
     xdf.insert(len(xdf.columns), len(xdf.columns), 0.)
@@ -32,12 +33,13 @@ if __name__ == '__main__':
     y = ydf.to_numpy()
     print(y.shape)
 
+
     def do_one(index):
         w, b = read_file(f'epoch_{index}')
-        #print(w, b)
+        # print(w, b)
 
         y_p = forward(w, b, x)
-        #print(y, np.around(y_p))
+        # print(y, np.around(y_p))
 
         fpr, tpr, thresholds = roc_curve(y, y_p)
         ks = max(tpr - fpr)
@@ -46,7 +48,7 @@ if __name__ == '__main__':
 
     if False:
         for i in range(10):
-            do_one(i+1)
+            do_one(i + 1)
 
     do_one(1)
     do_one(2)
@@ -54,9 +56,7 @@ if __name__ == '__main__':
     do_one(8)
     do_one(16)
 
-    #do_one(16)
-    #do_one(32)
-    #do_one(50)
-    #do_one(100)
-
-
+    # do_one(16)
+    # do_one(32)
+    # do_one(50)
+    # do_one(100)

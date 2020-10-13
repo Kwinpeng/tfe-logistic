@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def convert(prefix):
     dfx = pd.read_csv('X_train_woe.csv')
     dfx = dfx.reset_index()
@@ -7,7 +8,7 @@ def convert(prefix):
     dfy = dfy.reset_index()
 
     y_cols = dfy.columns
-    dfy.rename(columns={y_ori:'xy%d'%i for i, y_ori in enumerate(y_cols) if i > 0 and y_ori != 'y'}, inplace=True)
+    dfy.rename(columns={y_ori: 'xy%d' % i for i, y_ori in enumerate(y_cols) if i > 0 and y_ori != 'y'}, inplace=True)
 
     df = pd.merge(dfx, dfy, left_on='index', right_on='index', how='inner')
     df.pop('index')
@@ -26,7 +27,6 @@ def convert(prefix):
     dfx.pop('y')
     dfx.to_csv(f'{prefix}_tfe_host.csv', index=False, header=False)
 
+
 if __name__ == '__main__':
-
     convert('financial')
-
