@@ -39,10 +39,26 @@ class LinearRegression:
             ]
             return assign_ops
 
+    def loss(self, y_hat, y, batch_size):
+        """ Compute L2 loss """
+        with tf.name_scope("loss"):
+            loss_val = 0.5 * tfe.reduce_sum(tfe.square(y_hat - y)) / batch_size
+            return loss_val
+
     def loss_grad(self, y, y_hat):
         with tf.name_scope("loss-grad"):
             dy = y_hat - y
             return dy
+
+    def fit_forward(self, x, y):
+        """ Compute loss and grad, and fit """
+        batch_size = x.shape.as_list()[0]
+        with tf.name_scope("fit-forward"):
+            y_p = self.forward(x)
+            batch_loss_op = self.loss(y_p, y, batch_size)
+            dy = self.loss_grad(y, y_p)
+            fit_batch_op = self.backward(x, dy)
+            return batch_loss_op.reveal(), fit_batch_op
 
     def fit_batch(self, x, y):
         with tf.name_scope("fit-batch"):
@@ -56,8 +72,8 @@ class LinearRegression:
         print(" Calculating batch:")
         for batch in range(num_batches):
             print(" {0: >3d}".format(batch), end=' ')
-            sess.run(fit_batch_op, tag='fit-batch')
-        print('Done.')
+            sess.run(fit_batch_op, tag="fit-batch")
+        print("done.")
 
     def evaluate(self, sess, x, y, data_owner):
         """ Return the accuracy """
@@ -72,6 +88,7 @@ class LinearRegression:
 
         with tf.name_scope("evaluate"):
             y_p = self.forward(x)
+            # tfe.define_output is used for get true value of data
             print_accuracy_op = tfe.define_output(data_owner.player_name,
                                                   [y_p, y],
                                                   print_accuracy)

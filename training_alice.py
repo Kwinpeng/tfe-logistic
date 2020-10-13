@@ -27,7 +27,7 @@ def forward(w, b, x):
     return sigmoid(out)
 
 
-def inference(w, b, f_x, f_y):
+def load_test_data(f_x, f_y):
     xdf = pd.read_csv(f_x, header=None)
     xdf.insert(len(xdf.columns), len(xdf.columns), 0.)
     ydf = pd.read_csv(f_y, header=None)
@@ -35,6 +35,10 @@ def inference(w, b, f_x, f_y):
 
     x = xdf.to_numpy()
     y = ydf.to_numpy()
+    return x, y
+
+
+def inference(w, b, x, y):
     y_p = forward(w, b, x)
     # print(f'--> y_pred:{y_p}')
     # print(f'--> y_true:{y}')
@@ -58,16 +62,16 @@ def data_reveal(sess, data_owner, data):
 
 def main(server):
     case = test_set[0]
-    print('===================================================='
-          f'Running {case}:'
-          '====================================================')
+    print('================================================================\n'
+          f'Running {case}:\n'
+          '================================================================\n')
 
     name = case['n']
     num_rows = case['r']
     num_features = case['f']
-    num_epoch = 30
+    num_epoch = 6
     batch_size = 1024
-    num_batches = (num_rows // batch_size) * num_epoch
+    num_batches = num_rows // batch_size
 
     # who shall receive the output
     model_owner = ModelOwner('alice')
@@ -108,40 +112,30 @@ def main(server):
     x_train = tfe.concat([x_train_0, x_train_1], axis=1)
 
     model = LinearRegression(num_features)
+    fit_forward_op = model.fit_forward(x_train, y_train)
     reveal_weights_op = model_owner.receive_weights(model.weights)
+
+    # prepare test data
+    test_x_data, test_y_data = load_test_data(f'{name}/{name}_tfe_host.csv',
+                                              f'{name}/{name}_tfe_guest.csv')
 
     with tfe.Session() as sess:
         sess.run(tfe.global_variables_initializer(), tag='init')
         # sess.run(tf.initialize_local_variables())
 
-        num_batches = num_rows // batch_size
         for epoch in range(num_epoch):
-            print(f'Epoch {epoch}:')
-            model.fit(sess, x_train, y_train, num_batches)
-            # TODO(Morten)
-            # each evaluation results in nodes for a forward pass being added to the graph;
-            # maybe there's some way to avoid this, even if it means only if the shapes match
-            # model.evaluate(sess, x_train, y_train, data_owner_0)
-            # model.evaluate(sess, x_train, y_train, data_owner_1)
+            batch_loss = []
 
-            plain_w, plain_b = sess.run([model.weights[0].reveal(),
-                                         model.weights[1].reveal()])
-            # print(f'plain reveal model[w:b]: {plain_w.shape, type(plain_w), plain_b.shape}')
-            auc = inference(plain_w, plain_b,
-                            f'{name}/{name}_tfe_host.csv',
-                            f'{name}/{name}_tfe_guest.csv')
-            print(f'=> Train AUC: {auc}')
+            # fit batch by batch
+            for batch in range(num_batches):
+                loss_val, _ = sess.run(fit_forward_op, tag="fit-forward")
+                batch_loss.append(loss_val)
 
-        # y_all = sess.run(y_train.reveal())
-        # y_all = pd.DataFrame(y_all)
-        # y_all.to_csv('y_all.csv')
-
-        # print model weights
-        # sess.run(reveal_weights_op, tag='reveal')
-
-        # data_reveal(sess, data_owner_0, model.weights)
-        # data_reveal(sess, data_owner_0, y_train)
-        # data_reveal(sess, data_owner_1, y_train)
+            # compute auc of this epoch
+            plain_w, plain_b = sess.run([model.weights[0].reveal(), model.weights[1].reveal()])
+            auc = inference(plain_w, plain_b, test_x_data, test_y_data)
+            print('Epoch %2d | train loss: %20.16f | test auc: %20.16f'
+                  % (epoch, np.mean(batch_loss), auc))
 
 
 def start_master(cluster_config_file=None):
