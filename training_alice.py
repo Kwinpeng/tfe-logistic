@@ -12,10 +12,11 @@ import time
 
 # test data set configuration
 test_set = [
-    {'n': 'default_credit', 'r': 30000, 'f': 24, 's': 23},
-    {'n': 'breast', 'r': 569, 'f': 31, 's': 30},
-    {'n': 'financial', 'r': 3392, 'f': 225, 's': 224},
-    {'n': 'sonar', 'r': 208, 'f': 61, 's': 60}
+    {'n': 'default_credit', 'r': 30000, 'f': 24, 's': 23, 'b': 1024},
+    {'n': 'breast', 'r': 569, 'f': 31, 's': 30, 'b': 32},
+    {'n': 'financial', 'r': 3392, 'f': 225, 's': 224, 'b':128},
+    {'n': 'sonar', 'r': 208, 'f': 61, 's': 60, 'b':16},
+    {'n': 'madelon', 'r': 2000, 'f': 501, 's': 500, 'b':128}
 ]
 
 
@@ -62,7 +63,7 @@ def data_reveal(sess, data_owner, data):
 
 
 def main(server):
-    case = test_set[0]
+    case = test_set[4]
     print('================================================================\n'
           f'Running {case}:\n'
           '================================================================\n')
@@ -70,8 +71,8 @@ def main(server):
     name = case['n']
     num_rows = case['r']
     num_features = case['f']
-    num_epoch = 60
-    batch_size = 1024
+    num_epoch = 30
+    batch_size = case['b']
     num_batches = num_rows // batch_size
 
     # who shall receive the output
@@ -118,8 +119,8 @@ def main(server):
     reveal_weights_op = model_owner.receive_weights(model.weights)
 
     # prepare test data
-    test_x_data, test_y_data = load_test_data(f'{name}/{name}_tfe_host.csv',
-                                              f'{name}/{name}_tfe_guest.csv')
+    test_x_data, test_y_data = load_test_data(f'{name}/{name}_test_tfe_host.csv',
+                                              f'{name}/{name}_test_tfe_guest.csv')
 
     with tfe.Session() as sess:
         sess.run(tfe.global_variables_initializer(), tag='init')
