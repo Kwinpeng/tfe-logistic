@@ -2,7 +2,8 @@
 import tf_encrypted as tfe
 import tensorflow as tf
 import pandas as pd
-from common import DataOwner, ModelOwner, LinearRegression, DataSchema
+from common import DataOwner, ModelOwner, DataSchema
+from common import LinearRegression, LogisticRegression
 
 from sklearn.metrics import roc_auc_score, roc_curve
 import numpy as np
@@ -69,7 +70,7 @@ def main(server):
     name = case['n']
     num_rows = case['r']
     num_features = case['f']
-    num_epoch = 6
+    num_epoch = 60
     batch_size = 1024
     num_batches = num_rows // batch_size
 
@@ -111,7 +112,8 @@ def main(server):
                                   [1, 1])
     x_train = tfe.concat([x_train_0, x_train_1], axis=1)
 
-    model = LinearRegression(num_features)
+    # model = LinearRegression(num_features)
+    model = LogisticRegression(num_features)
     fit_forward_op = model.fit_forward(x_train, y_train)
     reveal_weights_op = model_owner.receive_weights(model.weights)
 

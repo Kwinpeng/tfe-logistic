@@ -159,6 +159,24 @@ class LogisticRegression:
             dy = y_hat - y
             return dy
 
+    def loss(self, y_p, y, batch_size):
+        """ Cross-entropy loss """
+        with tf.name_scope("cross-entropy"):
+            out = y * tfe.log(y_p) + (1 - y) * tfe.log(1 - y_p)
+            out = out.negative()
+            bce = out.reduce_sum(axis=0) / batch_size
+            return bce
+
+    def fit_forward(self, x, y):
+        """ Compute loss and grad, and fit """
+        batch_size = x.shape.as_list()[0]
+        with tf.name_scope("fit-forward"):
+            y_p = self.forward(x)
+            batch_loss_op = self.loss(y_p, y, batch_size)
+            dy = self.loss_grad(y, y_p)
+            fit_batch_op = self.backward(x, dy)
+            return batch_loss_op.reveal(), fit_batch_op
+
     def fit_batch(self, x, y):
         with tf.name_scope("fit-batch"):
             y_hat = self.forward(x)
