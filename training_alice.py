@@ -82,11 +82,11 @@ def main(server):
     # data_schema1 = DataSchema([tf.int64]+[tf.float64]*16, [0]+[0.0]*16)
     data_schema1 = DataSchema([tf.int64] + [tf.float64] * 1, [0] + [0.0] * 1)
     data_owner_0 = DataOwner('alice',
-                             f'{name}/{name}_tfe_host.csv',
+                             f'{name}/tfe_features_train.csv',
                              data_schema0,
                              batch_size=batch_size)
     data_owner_1 = DataOwner('bob',
-                             f'{name}/{name}_tfe_guest.csv',
+                             f'{name}/tfe_label_train.csv',
                              data_schema1,
                              batch_size=batch_size)
 
@@ -119,8 +119,8 @@ def main(server):
     reveal_weights_op = model_owner.receive_weights(model.weights)
 
     # prepare test data
-    test_x_data, test_y_data = load_test_data(f'{name}/{name}_test_tfe_host.csv',
-                                              f'{name}/{name}_test_tfe_guest.csv')
+    test_x_data, test_y_data = load_test_data(f'{name}/tfe_features_test.csv',
+                                              f'{name}/tfe_label_test.csv')
 
     with tfe.Session() as sess:
         sess.run(tfe.global_variables_initializer(), tag='init')
