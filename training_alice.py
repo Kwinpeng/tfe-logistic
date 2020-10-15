@@ -71,7 +71,7 @@ def main(server):
     name = case['n']
     num_rows = case['r']
     num_features = case['f']
-    num_epoch = 30
+    num_epoch = 80
     batch_size = case['b']
     num_batches = num_rows // batch_size
 
