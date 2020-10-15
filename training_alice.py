@@ -12,7 +12,7 @@ import time
 
 # test data set configuration
 test_set = [
-    {'n': 'default_credit', 'r': 30000, 'f': 24, 's': 23, 'b': 1024},
+    {'n': 'default_credit', 'r': 20100, 'f': 24, 's': 23, 'b': 1024},
     {'n': 'breast', 'r': 569, 'f': 31, 's': 30, 'b': 32},
     {'n': 'financial', 'r': 3392, 'f': 225, 's': 224, 'b':128},
     {'n': 'sonar', 'r': 208, 'f': 61, 's': 60, 'b':16},
@@ -63,7 +63,7 @@ def data_reveal(sess, data_owner, data):
 
 
 def main(server):
-    case = test_set[4]
+    case = test_set[0]
     print('================================================================\n'
           f'Running {case}:\n'
           '================================================================\n')
