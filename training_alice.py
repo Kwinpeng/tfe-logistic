@@ -113,8 +113,8 @@ def main(server):
                                   [1, 1])
     x_train = tfe.concat([x_train_0, x_train_1], axis=1)
 
-    # model = LinearRegression(num_features)
-    model = LogisticRegression(num_features)
+    model = LinearRegression(num_features)
+    # model = LogisticRegression(num_features)
     fit_forward_op = model.fit_forward(x_train, y_train)
     reveal_weights_op = model_owner.receive_weights(model.weights)
 
