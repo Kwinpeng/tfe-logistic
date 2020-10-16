@@ -28,7 +28,7 @@ class LinearRegression:
             out = tfe.matmul(x, self.w_masked) + self.b_masked
             return out
 
-    def backward(self, x, dy, learning_rate=0.01):
+    def backward(self, x, dy, learning_rate):
         batch_size = x.shape.as_list()[0]
         with tf.name_scope("backward"):
             dw = tfe.matmul(tfe.transpose(x), dy) / batch_size
@@ -50,14 +50,14 @@ class LinearRegression:
             dy = y_hat - y
             return dy
 
-    def fit_forward(self, x, y):
+    def fit_forward(self, x, y, learning_rate=0.01):
         """ Compute loss and grad, and fit """
         batch_size = x.shape.as_list()[0]
         with tf.name_scope("fit-forward"):
             y_p = self.forward(x)
             batch_loss_op = self.loss(y_p, y, batch_size)
             dy = self.loss_grad(y, y_p)
-            fit_batch_op = self.backward(x, dy)
+            fit_batch_op = self.backward(x, dy, learning_rate)
             return batch_loss_op.reveal(), fit_batch_op
 
     def fit_batch(self, x, y):
@@ -143,7 +143,7 @@ class LogisticRegression:
             y_p = tfe.sigmoid(out)
             return y_p
 
-    def backward(self, x, dy, learning_rate=0.01):
+    def backward(self, x, dy, learning_rate):
         batch_size = x.shape.as_list()[0]
         with tf.name_scope("backward"):
             dw = tfe.matmul(tfe.transpose(x), dy) / batch_size
@@ -167,14 +167,14 @@ class LogisticRegression:
             bce = out.reduce_sum(axis=0) / batch_size
             return bce
 
-    def fit_forward(self, x, y):
+    def fit_forward(self, x, y, learning_rate=0.01):
         """ Compute loss and grad, and fit """
         batch_size = x.shape.as_list()[0]
         with tf.name_scope("fit-forward"):
             y_p = self.forward(x)
             batch_loss_op = self.loss(y_p, y, batch_size)
             dy = self.loss_grad(y, y_p)
-            fit_batch_op = self.backward(x, dy)
+            fit_batch_op = self.backward(x, dy, learning_rate)
             return batch_loss_op.reveal(), fit_batch_op
 
     def fit_batch(self, x, y):

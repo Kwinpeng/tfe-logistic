@@ -63,7 +63,7 @@ def data_reveal(sess, data_owner, data):
 
 
 def main(server):
-    case = test_set[1]
+    case = test_set[0]
     print('================================================================\n'
           f'Running {case}:\n'
           '================================================================\n')
