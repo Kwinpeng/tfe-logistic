@@ -12,11 +12,11 @@ import time
 
 # test data set configuration
 test_set = [
-    {'n': 'default_credit', 'r': 20100, 'f': 24, 's': 23, 'b': 1024},
-    {'n': 'breast', 'r': 381, 'f': 31, 's': 30, 'b': 32},
-    {'n': 'financial', 'r': 2942, 'f': 225, 's': 224, 'b':128},
-    {'n': 'madelon', 'r': 2000, 'f': 501, 's': 500, 'b':128},
-    {'n': 'sonar', 'r': 208, 'f': 61, 's': 60, 'b':16}
+    {'n': 'default_credit', 'r': 20100, 'f': 24, 's': 23, 'b': 1024, 'l': 0.01},
+    {'n': 'breast', 'r': 381, 'f': 31, 's': 30, 'b': 32, 'l': 0.002},
+    {'n': 'financial', 'r': 2942, 'f': 225, 's': 224, 'b':128, 'l': 0.01},
+    {'n': 'madelon', 'r': 2000, 'f': 501, 's': 500, 'b':128, 'l': 0.01},
+    {'n': 'sonar', 'r': 208, 'f': 61, 's': 60, 'b':16, 'l': 0.001}
 ]
 
 
@@ -63,7 +63,7 @@ def data_reveal(sess, data_owner, data):
 
 
 def main(server):
-    case = test_set[0]
+    case = test_set[1]
     print('================================================================\n'
           f'Running {case}:\n'
           '================================================================\n')
@@ -71,7 +71,7 @@ def main(server):
     name = case['n']
     num_rows = case['r']
     num_features = case['f']
-    num_epoch = 80
+    num_epoch = 50
     batch_size = case['b']
     num_batches = num_rows // batch_size
 
@@ -115,7 +115,7 @@ def main(server):
 
     model = LinearRegression(num_features)
     # model = LogisticRegression(num_features)
-    fit_forward_op = model.fit_forward(x_train, y_train)
+    fit_forward_op = model.fit_forward(x_train, y_train, learning_rate=case['l'])
     reveal_weights_op = model_owner.receive_weights(model.weights)
 
     # prepare test data
