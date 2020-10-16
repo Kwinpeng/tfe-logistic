@@ -44,13 +44,14 @@ class LinearRegression:
     def loss(self, y_hat, y, batch_size):
         """ Compute L2 loss """
         with tf.name_scope("loss"):
-            loss_val = 0.5 * tfe.reduce_sum(tfe.square(y_hat - y)) / batch_size
+            # loss_val = 0.5 * tfe.reduce_sum(tfe.square(y_hat - y)) / batch_size
+            loss_val = tfe.reduce_sum(tfe.square(y_hat - y)) / batch_size
             return loss_val
 
     def loss_grad(self, y, y_hat):
         with tf.name_scope("loss-grad"):
             dy = y_hat - y
-            return dy
+            return 2. * dy
 
     def fit_forward(self, x, y, learning_rate=0.01):
         """ Compute loss and grad, and fit """
